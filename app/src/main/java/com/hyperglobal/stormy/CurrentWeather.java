@@ -77,8 +77,9 @@ public class CurrentWeather {
         mTime = time;
     }
 
-    public double getTemperature() {
-        return mTemperature;
+    public int getTemperature() {
+        double celsius = (mTemperature-32)*0.55556;
+        return (int) Math.round(celsius); // return a cast integer, rounded to remove decimal points, converting F to C.
     }
 
     public void setTemperature(double temperature) {
@@ -93,8 +94,9 @@ public class CurrentWeather {
         mHumidity = humidity;
     }
 
-    public double getPrecipChance() {
-        return mPrecipChance;
+    public int getPrecipChance() {
+        double precipPerctentage = mPrecipChance * 100;
+        return (int) Math.round(precipPerctentage);
     }
 
     public void setPrecipChance(double precipChance) {
