@@ -1,10 +1,12 @@
-package com.hyperglobal.stormy;
+package com.hyperglobal.stormy.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
+
+import com.hyperglobal.stormy.R;
 
 /**
  * Created by bmac on 11/04/2015.

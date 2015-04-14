@@ -1,4 +1,4 @@
-package com.hyperglobal.stormy;
+package com.hyperglobal.stormy.ui;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -7,20 +7,24 @@ import android.net.NetworkInfo;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hyperglobal.stormy.R;
+import com.hyperglobal.stormy.weather.Current;
+import com.hyperglobal.stormy.weather.Day;
+import com.hyperglobal.stormy.weather.Forecast;
+import com.hyperglobal.stormy.weather.Hour;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,7 +38,7 @@ public class MainActivity extends ActionBarActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
 
-    private CurrentWeather mCurrentWeather;
+    private Forecast mForecast;
 
     @InjectView(R.id.timeLabel) TextView mTimeLabel;
     @InjectView(R.id.temperatureValue) TextView mTemperatureValue;
@@ -108,7 +112,7 @@ public class MainActivity extends ActionBarActivity {
                         String jsonData = response.body().string(); // stick it in a variable
                         Log.v(TAG, jsonData); // log it (optional)
                         if (response.isSuccessful()) { // if the response is successful
-                            mCurrentWeather = getCurrentDetails(jsonData); // set the CurrentWeather var by calling getCurrentDetails method...
+                            mForecast = parseForecastDetails(jsonData); // set the CurrentWeather var by calling getCurrentDetails method...
                             runOnUiThread(new Runnable() { // tell android to run this in the main thread so the UI can be updated
                                 @Override
                                 public void run() {
@@ -142,17 +146,74 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void updateDisplay() {
-        mTemperatureValue.setText(mCurrentWeather.getTemperature()+"");
-        mSummaryValue.setText(mCurrentWeather.getSummary());
-        mTimeLabel.setText("At " + mCurrentWeather.getFormattedTime() + " it will be");
-        mPrecipValue.setText(mCurrentWeather.getPrecipChance()+"%");
-        mHumidityValue.setText(mCurrentWeather.getHumidity()+"");
+        Current current = mForecast.getCurrent();
+        mTemperatureValue.setText(current.getTemperature()+"");
+        mSummaryValue.setText(current.getSummary());
+        mTimeLabel.setText("At " + current.getFormattedTime() + " it will be");
+        mPrecipValue.setText(current.getPrecipChance()+"%");
+        mHumidityValue.setText(current.getHumidity()+"");
 
-        Drawable drawable = getResources().getDrawable(mCurrentWeather.getIconId());
+        Drawable drawable = getResources().getDrawable(current.getIconId());
         mIcon.setImageDrawable(drawable);
     }
 
-    private CurrentWeather getCurrentDetails(String jsonData) throws JSONException { // get weather method - returns a CurrentWeather object, takes json from forecast.io
+    private Forecast parseForecastDetails(String jsonData) throws JSONException{
+        Forecast forecast = new Forecast();
+
+        forecast.setCurrent(getCurrentDetails(jsonData));
+        forecast.setHourlyForecast(getHourlyForecast(jsonData));
+        forecast.setDailyForecast(getDailyForecast(jsonData));
+
+        return forecast;
+    }
+
+    private Day[] getDailyForecast(String jsonData) throws JSONException {
+        JSONObject forecast = new JSONObject(jsonData); // see getHourlyForecast for explanation - works in the same way.
+        String timezone = forecast.getString("timezone"); // example of extracting string from root of JSON
+        JSONObject daily = forecast.getJSONObject("daily");
+        JSONArray data = daily.getJSONArray("data");
+
+        Day[] days = new Day[data.length()];
+
+        for (int i = 0; i < data.length(); i++){
+            JSONObject jsonDay = data.getJSONObject(i);
+            Day day = new Day();
+
+            day.setTime(jsonDay.getLong("time"));
+            day.setIcon(jsonDay.getString("icon"));
+            day.setSummary(jsonDay.getString("summary"));
+            day.setTemperatureMax(jsonDay.getDouble("temperatureMax"));
+            day.setTimezone(timezone);
+
+            days[i] = day;
+        }
+        return days;
+    }
+
+    private Hour[] getHourlyForecast(String jsonData) throws JSONException {
+        JSONObject forecast = new JSONObject(jsonData); // init new JSONObject containing JSON
+        String timezone = forecast.getString("timezone"); // example of extracting string from root of JSON
+        JSONObject hourly = forecast.getJSONObject("hourly"); // make an object containing everything in the JSON object named 'hourly'
+        JSONArray data = hourly.getJSONArray("data"); // then make an array containing everything in the JSON array named 'data'
+
+        Hour[] hours = new Hour[data.length()]; // set up a new array the length of which is the same as the 'data' array
+
+        for (int i = 0; i < data.length(); i++){ // loop through the data array
+            JSONObject jsonHour = data.getJSONObject(i); // get a fresh JSONObject from the 'data' array at index i
+            Hour hour = new Hour(); // set up a new hour array
+
+            hour.setSummary(jsonHour.getString("summary")); // populate the hour array with the data from 'data' array (at the location defined by loop
+            hour.setIcon(jsonHour.getString("icon"));
+            hour.setTemperature(jsonHour.getDouble("temperature"));
+            hour.setTime(jsonHour.getLong("time"));
+            hour.setTimeZone(timezone);
+
+            hours[i] = hour;
+        }
+        return hours;
+    }
+
+    private Current getCurrentDetails(String jsonData) throws JSONException { // get weather method - returns a CurrentWeather object, takes json from forecast.io
         JSONObject forecast = new JSONObject(jsonData); // init new JSONObject containing JSON
         String timezone = forecast.getString("timezone"); // example of extracting string from root of JSON
 
@@ -160,18 +221,18 @@ public class MainActivity extends ActionBarActivity {
 
         JSONObject currently = forecast.getJSONObject("currently"); // example of extracting JSON object (ie, nested list)
 
-        CurrentWeather currentWeather = new CurrentWeather(); // setup new var
-        currentWeather.setHumidity(currently.getDouble("humidity")); // call setter methods in CurrentWeather to set model data...
-        currentWeather.setTime(currently.getLong("time"));
-        currentWeather.setIcon(currently.getString("icon"));
-        currentWeather.setPrecipChance(currently.getDouble("precipProbability"));
-        currentWeather.setTemperature(currently.getDouble("temperature"));
-        currentWeather.setSummary(currently.getString("summary"));
-        currentWeather.setTimeZone(timezone);
+        Current current = new Current(); // setup new var
+        current.setHumidity(currently.getDouble("humidity")); // call setter methods in CurrentWeather to set model data...
+        current.setTime(currently.getLong("time"));
+        current.setIcon(currently.getString("icon"));
+        current.setPrecipChance(currently.getDouble("precipProbability"));
+        current.setTemperature(currently.getDouble("temperature"));
+        current.setSummary(currently.getString("summary"));
+        current.setTimeZone(timezone);
 
-        Log.d(TAG,currentWeather.getFormattedTime());
+        Log.d(TAG, current.getFormattedTime());
 
-        return currentWeather; // finally, return the output
+        return current; // finally, return the output
     }
 
     private boolean isNetWorkAvailable() { // method to check network availability
