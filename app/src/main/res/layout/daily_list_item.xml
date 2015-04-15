@@ -25,7 +25,9 @@
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/circleImageView"
         android:layout_toEndOf="@+id/circleImageView"
-        android:src="@mipmap/clear_day"/>
+        android:src="@mipmap/clear_day"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -50,6 +52,6 @@
         android:layout_alignRight="@+id/circleImageView"
         android:gravity="center"
         tools:text="99"
-        android:textColor="#f25019"
-        android:textSize="30sp"/>
+        android:textColor="#80f25019"
+        android:textSize="24sp"/>
 </RelativeLayout>
