@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                tools:background="@drawable/bg_gradient"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
+
+    <TextView
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/timeLabel"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textColor="#ffffffff"
+        tools:text="12 PM"
+        android:textSize="24sp"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/iconImageView"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/timeLabel"
+        android:layout_toEndOf="@+id/timeLabel"
+        android:layout_centerVertical="true"
+        android:src="@mipmap/clear_day"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Cloudy with a chance of albondigas"
+        android:id="@+id/summaryTextView"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/iconImageView"
+        android:layout_toEndOf="@+id/iconImageView"
+        android:textColor="#ffffffff"
+        android:textSize="10sp"
+        android:layout_toLeftOf="@+id/temperatureTextView"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/temperatureTextView"
+        android:layout_alignTop="@+id/summaryTextView"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:textColor="#ffffffff"
+        tools:text="99"
+        android:textSize="24sp"/>
+</RelativeLayout>
