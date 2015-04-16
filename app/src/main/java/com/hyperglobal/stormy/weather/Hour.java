@@ -3,6 +3,10 @@ package com.hyperglobal.stormy.weather;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 /**
  * Created by cshop on 14/04/2015.
  */
@@ -21,6 +25,13 @@ public class Hour implements Parcelable {
         mTime = time;
     }
 
+    public String getHour(){
+        SimpleDateFormat formatter = new SimpleDateFormat("HH");
+        formatter.setTimeZone(TimeZone.getTimeZone(mTimeZone));
+        Date hourTime = new Date(mTime * 1000);
+        return formatter.format(hourTime);
+    }
+
     public String getSummary() {
         return mSummary;
     }
@@ -29,8 +40,9 @@ public class Hour implements Parcelable {
         mSummary = summary;
     }
 
-    public double getTemperature() {
-        return mTemperature;
+    public int getTemperature() {
+        double celsius = (mTemperature-32)*0.55556; // convert F to C
+        return (int) Math.round(celsius); // return a cast integer, rounded to remove decimal points, converting F to C.
     }
 
     public void setTemperature(double temperature) {
@@ -43,6 +55,10 @@ public class Hour implements Parcelable {
 
     public void setIcon(String icon) {
         mIcon = icon;
+    }
+
+    public int getIconId(){
+        return Forecast.getIconId(mIcon);
     }
 
     public String getTimeZone() {

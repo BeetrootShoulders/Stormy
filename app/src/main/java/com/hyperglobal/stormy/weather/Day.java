@@ -9,6 +9,7 @@ import java.util.TimeZone;
 
 /**
  * Created by cshop on 14/04/2015.
+ * Day Model
  */
 public class Day implements Parcelable {
     private long mTime;
